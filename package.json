@@ -1,0 +1,7 @@
+{
+  "name": "private-github-content-client",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Browser helpers for reading private GitHub repository content with fine-grained tokens",
+  "scripts": { "check": "node --check github-private-content-client.js" }
+}
