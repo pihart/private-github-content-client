@@ -7,14 +7,14 @@
     return normalized;
   }
 
-  function createTokenCreationUrl({ owner, repository, name = "Private repository reader", description, expiresIn = 90 }) {
+  function createTokenCreationUrl({ owner, repository, name = "Private repository reader", description, expiresIn = 90, contentsPermission = "read" }) {
     const url = new URL("https://github.com/settings/personal-access-tokens/new");
     url.search = new URLSearchParams({
       name,
       description: description || `Read-only browser access to ${owner}/${repository}`,
       target_name: owner,
       expires_in: String(expiresIn),
-      contents: "read",
+      contents: contentsPermission,
     }).toString();
     return url.toString();
   }
@@ -35,10 +35,14 @@
       return requestUrl;
     }
 
-    async function request(path, { query = {}, accept = "application/vnd.github.raw+json" } = {}) {
+    async function request(path, { query = {}, accept = "application/vnd.github.raw+json", method = "GET", body } = {}) {
       if (!token) throw new Error("A repository token is required.");
+      const headers = { Authorization: `Bearer ${token}`, Accept: accept, "X-GitHub-Api-Version": "2026-03-10" };
+      if (body !== undefined) headers["Content-Type"] = "application/json";
       const response = await fetchImpl(url(path, query), {
-        headers: { Authorization: `Bearer ${token}`, Accept: accept, "X-GitHub-Api-Version": "2026-03-10" },
+        method,
+        headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
         cache: "no-store",
       });
       if ([401, 403, 404].includes(response.status)) throw new Error("GitHub could not read this private repository. Check the token, repository selection, expiration, and Contents permission.");
