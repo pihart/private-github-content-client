@@ -68,7 +68,7 @@
       submitButton.disabled = true;
       try {
         client.unlock(tokenInput.value);
-        await onUnlock();
+        await onUnlock(token);
         tokenInput.value = "";
       } catch (error) {
         client.lock();
@@ -80,7 +80,7 @@
     return async () => {
       if (!client.restore()) return false;
       submitButton.disabled = true;
-      try { await onUnlock(); return true; }
+      try { await onUnlock(token); return true; }
       catch (error) {
         client.lock();
         if (status) status.textContent = "Repository token required";
