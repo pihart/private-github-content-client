@@ -56,6 +56,7 @@
         if (!token) throw new Error("Enter a fine-grained GitHub token.");
         storage.setItem(sessionKey, token);
       },
+      currentToken() { return token; },
       restore() { token = storage.getItem(sessionKey) || ""; return token; },
       lock() { token = ""; storage.removeItem(sessionKey); },
     });
@@ -68,7 +69,7 @@
       submitButton.disabled = true;
       try {
         client.unlock(tokenInput.value);
-        await onUnlock(token);
+        await onUnlock(client.currentToken());
         tokenInput.value = "";
       } catch (error) {
         client.lock();
@@ -80,7 +81,7 @@
     return async () => {
       if (!client.restore()) return false;
       submitButton.disabled = true;
-      try { await onUnlock(token); return true; }
+      try { await onUnlock(client.currentToken()); return true; }
       catch (error) {
         client.lock();
         if (status) status.textContent = "Repository token required";
